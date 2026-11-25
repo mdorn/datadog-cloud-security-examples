@@ -109,10 +109,13 @@ sandbox account:
    storage** turned on. Use a Remote-Configuration-enabled API key. Agentless covers:
    host vulns, container images on the host, and the S3 bucket. Scans run every 12 h;
    `make scan` triggers an on-demand scan.
-3. Optional: set `install_datadog_agent = true` to put the Agent on the instance
-   (SBOM for host and container images, CSM Threats runtime). Note: Agentless **skips**
-   hosts where the Agent runs with both Cloud Security Vulnerabilities and
-   Misconfigurations enabled; S3 SDS always needs Agentless.
+3. Optional: set `install_datadog_agent = true` (and `instance_type = "t3.small"`) to put
+   the Agent on the instance. User data writes `datadog.yaml`, `system-probe.yaml` and
+   `security-agent.yaml` in full: APM (non-local traffic, for the container), Remote
+   Configuration, SBOM for host and container images, compliance (misconfigurations) and
+   Workload Protection. Note: Agentless **skips** hosts where the Agent runs with both
+   Cloud Security Vulnerabilities and Misconfigurations enabled, so host vulns then come
+   from the Agent. S3 SDS always needs Agentless.
 
 The bucket uses SSE-S3 (AES256), not KMS, so the Agentless scanner needs no extra key
 grants.
