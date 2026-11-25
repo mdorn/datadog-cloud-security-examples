@@ -1,6 +1,7 @@
-# INTENTIONAL: EOL base image. Debian 10 "buster" (EOL 2024-06) + Python 3.8 (EOL 2024-10).
+# INTENTIONAL: EOL base image. Debian 10 "buster" (EOL 2024-06) + Python 3.9 (EOL 2025-10).
 # The full (non-slim) image carries hundreds of OS package CVEs, plus gcc so old pins build.
-FROM python:3.8-buster
+# (Python 3.9, not 3.8: current ddtrace needs 3.9+ for APM, App and API Protection and IAST.)
+FROM python:3.9-buster
 
 # Buster's repos moved to archive.debian.org; repoint apt so the explicit installs below work.
 # INTENTIONAL: explicit OS packages frozen at their last buster version (no further fixes):
@@ -31,6 +32,16 @@ ENV TODO_DB=/data/todos.db
 VOLUME ["/data"]
 EXPOSE 5000
 
+# Datadog tracing and application security (ddtrace-run below).
+# DD_AGENT_HOST is set at `docker run` time (host Agent via host.docker.internal).
+ENV DD_SERVICE=todo-app \
+    DD_ENV=attack-path-lab \
+    DD_VERSION=0.1.0 \
+    DD_LOGS_INJECTION=true \
+    DD_APPSEC_ENABLED=true \
+    DD_IAST_ENABLED=true \
+    DD_APPSEC_SCA_ENABLED=true
+
 # INTENTIONAL: runs as root (no USER directive) -> container misconfiguration finding.
 # Never run Flask's dev server or debug mode here; gunicorn only.
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--access-logfile", "-", "app:app"]
+CMD ["ddtrace-run", "gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--access-logfile", "-", "app:app"]

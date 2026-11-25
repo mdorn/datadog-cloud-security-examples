@@ -23,8 +23,9 @@ What Datadog should show for it:
 |---|---|
 | Misconfigurations (CSPM) | SG open to the world, IMDSv1 allowed, unencrypted EBS, S3 without access logging or versioning |
 | Vulnerabilities (host) | Old Ubuntu 22.04 AMI (2023 build), unattended-upgrades turned off |
-| Vulnerabilities (container image) | `python:3.8-buster` (Debian 10 and Python 3.8, both EOL) plus extra apt packages |
+| Vulnerabilities (container image) | `python:3.9-buster` (Debian 10 and Python 3.9, both EOL) plus extra apt packages |
 | Vulnerabilities (app libraries) | `app/requirements.txt` pins (Flask, Werkzeug, Jinja2, PyYAML, requests, urllib3, gunicorn) |
+| APM + App and API Protection + Code Security (IAST, Runtime SCA) | `ddtrace-run` in the container, traces to the host Agent (needs `install_datadog_agent = true`) |
 | Sensitive Data Scanner (cloud storage) | `data/customer_records.txt` in the bucket (US SSN library rule) |
 | Attack path / toxic combination | Publicly reachable instance + critical vulns + role that can read sensitive S3 data |
 
@@ -156,7 +157,7 @@ cd app && docker build -t todo-lab . && docker run --rm -p 8080:5000 todo-lab
 - The 2023 Ubuntu AMIs are **deprecated** by AWS, so the AMI lookup sets
   `include_deprecated = true`. If Canonical deregisters them, change
   `ami_name_pattern` in `terraform.tfvars`.
-- `python:3.8-buster` is EOL; its apt sources are repointed to `archive.debian.org`
+- `python:3.9-buster` is EOL; its apt sources are repointed to `archive.debian.org`
   in the Dockerfile. If that mirror ever breaks, drop the `apt-get` step; the base image
   alone still carries hundreds of CVEs.
 - If your account enforces EBS encryption by default, the "unencrypted EBS" finding will

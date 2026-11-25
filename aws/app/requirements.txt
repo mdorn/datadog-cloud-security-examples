@@ -1,14 +1,18 @@
-# INTENTIONAL: every pin below is old and has known CVEs. Do not upgrade unless asked.
-# Pins are chosen to install together on python:3.8-buster.
+# INTENTIONAL: every pin below (except ddtrace) is old and has known CVEs. Do not upgrade unless asked.
+# Pins are chosen to install together on python:3.9-buster. The Flask stack is the 1.1 line
+# (not older) because Datadog IAST supports Flask 1.1+ only.
 
-Flask==0.12.2        # CVE-2018-1000656 (DoS via JSON), CVE-2019-1010083 (DoS), CVE-2023-30861 (session cookie leak)
-Werkzeug==0.14.1     # CVE-2019-14806, CVE-2023-25577 (multipart DoS), CVE-2023-46136, CVE-2024-34069 (debugger RCE, high)
-Jinja2==2.10         # CVE-2019-10906 (sandbox escape), CVE-2020-28493, CVE-2024-22195, CVE-2024-34064, CVE-2024-56201
+Flask==1.1.4         # CVE-2023-30861 (session cookie disclosure behind caching proxies)
+Werkzeug==1.0.1      # CVE-2023-25577 (multipart DoS, high), CVE-2023-23934 (cookie parsing), CVE-2023-46136 (multipart DoS), CVE-2024-34069 (debugger RCE, high), CVE-2024-49766, CVE-2024-49767
+Jinja2==2.11.3       # CVE-2024-22195, CVE-2024-34064 (xmlattr XSS), CVE-2024-56201, CVE-2024-56326 (sandbox escape), CVE-2025-27516
 MarkupSafe==1.1.1
-itsdangerous==0.24
-click==7.0
+itsdangerous==1.1.0
+click==7.1.2
 
 PyYAML==5.3.1        # CVE-2020-14343 (arbitrary code execution via full_load, CVSS 9.8 critical)
 requests==2.19.1     # CVE-2018-18074 (credential leak on redirect), CVE-2023-32681 (proxy auth leak)
 urllib3==1.23        # CVE-2018-20060, CVE-2019-11236 (CRLF injection), CVE-2019-11324, CVE-2021-33503 (ReDoS)
 gunicorn==19.9.0     # CVE-2024-1135 (HTTP request smuggling, high), CVE-2024-6827
+
+# Datadog tracer: APM, App and API Protection, IAST and Runtime SCA. Current release, not a weakness.
+ddtrace==4.17.2

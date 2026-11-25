@@ -119,6 +119,8 @@ docker run -d \
   --restart unless-stopped \
   -p 80:5000 \
   -v /opt/todo-data:/data \
+  --add-host=host.docker.internal:host-gateway \
+  -e DD_AGENT_HOST=host.docker.internal \
   -l com.datadoghq.tags.env=attack-path-lab \
   -l com.datadoghq.tags.service=todo-app \
   -l com.datadoghq.tags.version=0.1.0 \

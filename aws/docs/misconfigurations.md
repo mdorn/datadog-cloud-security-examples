@@ -19,10 +19,10 @@ Datadog UI after the first scan and update this table.
 | 9 | `terraform/iam.tf` | Web host role can `s3:GetObject` / `s3:ListBucket` on the sensitive bucket | Edge from host to sensitive data in the attack path |
 | 10 | `terraform/s3.tf` | No versioning, no access logging | Misconfiguration: S3 versioning / access logging |
 | 11 | `data/customer_records.txt` | 25 synthetic SSNs in S3 | Sensitive Data Scanner: US Social Security Number |
-| 12 | `app/Dockerfile` | `python:3.8-buster` base (EOL Debian 10 + Python 3.8) | Container image vulnerabilities (OS packages) |
+| 12 | `app/Dockerfile` | `python:3.9-buster` base (EOL Debian 10 + Python 3.9) | Container image vulnerabilities (OS packages) |
 | 13 | `app/Dockerfile` | Explicit apt installs frozen at buster versions (imagemagick, libxml2, openssl, curl, sudo, git) | Container image vulnerabilities (OS packages) |
 | 14 | `app/Dockerfile` | Container runs as root | Container misconfiguration (if the Agent is installed) |
-| 15 | `app/requirements.txt` | Flask 0.12.2, Werkzeug 0.14.1, Jinja2 2.10, PyYAML 5.3.1 (critical), requests 2.19.1, urllib3 1.23, gunicorn 19.9.0 | Library vulnerabilities (critical and high) |
+| 15 | `app/requirements.txt` | Flask 1.1.4, Werkzeug 1.0.1, Jinja2 2.11.3, PyYAML 5.3.1 (critical), requests 2.19.1, urllib3 1.23, gunicorn 19.9.0 | Library vulnerabilities (critical and high) |
 
 ### The attack path in one line
 
