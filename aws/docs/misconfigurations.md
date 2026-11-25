@@ -23,6 +23,8 @@ Datadog UI after the first scan and update this table.
 | 13 | `app/Dockerfile` | Explicit apt installs frozen at buster versions (imagemagick, libxml2, openssl, curl, sudo, git) | Container image vulnerabilities (OS packages) |
 | 14 | `app/Dockerfile` | Container runs as root | Container misconfiguration (if the Agent is installed) |
 | 15 | `app/requirements.txt` | Flask 1.1.4, Werkzeug 1.0.1, Jinja2 2.11.3, PyYAML 5.3.1 (critical), requests 2.19.1, urllib3 1.23, gunicorn 19.9.0 | Library vulnerabilities (critical and high) |
+| 16 | `app/app.py` (`GET /search`) | SQL injection: `q` interpolated into a `SELECT` with an f-string | SAST `python-security/variable-sql-statement-injection` (high); IAST SQL injection vulnerability once `/search` gets traffic; App and API Protection SQLi attack traces/signals for injection payloads |
+| 17 | `app/app.py` | `TODO_DB` falls back to a hard-coded `/tmp/todos.db` | SAST `python-security/hardcoded-tmp-file` (medium) |
 
 ### The attack path in one line
 
@@ -32,4 +34,6 @@ instance role credentials (#9) → S3 bucket with SSNs (#11).
 ## Not done on purpose (safety)
 
 - No SSH, no key pair, no Flask debug mode, no RCE-style endpoints.
+- The one injectable query (#16) is a read-only `SELECT` on the to-do SQLite file. No
+  stacked queries, no extension loading, nothing sensitive in that database.
 - Bucket stays private (public access block on). Exposure is through the role only.

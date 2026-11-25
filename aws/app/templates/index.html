@@ -23,6 +23,10 @@
     <input name="title" placeholder="Add a task" maxlength="200" autofocus>
     <button type="submit">Add</button>
   </form>
+  <form class="add" method="get" action="{{ url_for('search') }}">
+    <input name="q" placeholder="Search tasks" value="{{ q or '' }}">
+    <button type="submit">Search</button>
+  </form>
   <ul>
     {% for t in todos %}
     <li class="{{ 'done' if t['done'] else '' }}">
