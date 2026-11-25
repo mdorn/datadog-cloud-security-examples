@@ -2,6 +2,10 @@
 
 The app is the *carrier* for vulnerable packages. It must stay boring:
 no debug mode, no shell-outs, no yaml.load on user input, no S3 access.
+
+One deliberate exception: /search has a SQL injection (see CLAUDE.md, ground rule 2).
+It is a read-only SELECT against the local to-do SQLite file. Python's sqlite3 runs one
+statement per execute() (no stacked queries) and leaves extension loading off.
 """
 import os
 import sqlite3
@@ -37,6 +41,18 @@ def close_db(_exc):
 def index():
     todos = get_db().execute("SELECT id, title, done FROM todos ORDER BY id DESC").fetchall()
     return render_template("index.html", todos=todos)
+
+
+@app.route("/search")
+def search():
+    q = request.args.get("q", "")
+    # INTENTIONAL: SQL injection (user input interpolated into the query with an f-string)
+    # -> SAST (Code Security static analysis), IAST SQL injection vuln, AAP SQLi attack signals.
+    # Do not parameterize this one; every other query in this file stays parameterized.
+    todos = get_db().execute(
+        f"SELECT id, title, done FROM todos WHERE title LIKE '%{q}%' ORDER BY id DESC"
+    ).fetchall()
+    return render_template("index.html", todos=todos, q=q)
 
 
 @app.route("/add", methods=["POST"])

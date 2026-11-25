@@ -35,7 +35,16 @@ locals {
     install_datadog_agent = var.install_datadog_agent
     datadog_api_key       = var.datadog_api_key
     datadog_site          = var.datadog_site
+    git_repository_url    = var.git_repository_url
+    git_commit_sha        = var.git_commit_sha
   })
+}
+
+check "git_commit_sha_set" {
+  assert {
+    condition     = var.git_commit_sha != ""
+    error_message = "git_commit_sha is empty, so Datadog source code integration will not link traces or vulns to code. Use `make plan`/`make apply`, or export TF_VAR_git_commit_sha=$(git rev-parse HEAD)."
+  }
 }
 
 resource "aws_instance" "app" {
@@ -48,7 +57,8 @@ resource "aws_instance" "app" {
   # INTENTIONAL: public IP on an internet-routed subnet -> "publicly accessible"
   associate_public_ip_address = true
 
-  user_data                   = local.user_data
+  # Gzipped (cloud-init unpacks it) to stay well under the 16 KB EC2 user data limit.
+  user_data_base64            = base64gzip(local.user_data)
   user_data_replace_on_change = true
 
   # INTENTIONAL: IMDSv1 allowed (tokens optional) -> CSPM "EC2 should use IMDSv2"
@@ -78,8 +88,9 @@ resource "aws_instance" "app" {
       error_message = "install_datadog_agent = true needs datadog_api_key."
     }
     precondition {
-      condition     = length(local.user_data) < 16000
-      error_message = "User data is over the 16 KB EC2 limit. Move app delivery to S3 or ECR."
+      # EC2 counts the decoded (gzipped) bytes: base64 length * 3/4.
+      condition     = length(base64gzip(local.user_data)) * 3 / 4 < 16000
+      error_message = "Gzipped user data is over the 16 KB EC2 limit. Move app delivery to S3 or ECR."
     }
   }
 }

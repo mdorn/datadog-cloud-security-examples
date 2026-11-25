@@ -34,36 +34,105 @@ mkdir -p "$(dirname "$APP_DIR/${path}")"
 echo '${content}' | base64 -d > "$APP_DIR/${path}"
 %{ endfor ~}
 
+%{ if install_datadog_agent ~}
 # ---------------------------------------------------------------------------
-# 4. Build and run the container
+# 4. Optional: Datadog Agent. Installed before the app starts so the first traces land.
+#    Config files are written in full (not patched) so every feature is explicit:
+#    APM for the container, Remote Configuration (App and API Protection), SBOM for the
+#    host and container images (vulnerabilities), compliance (misconfigurations) and
+#    runtime security (Workload Protection).
+#    Note: with Cloud Security vulns + misconfigs on in the Agent, Agentless skips this host.
 # ---------------------------------------------------------------------------
-docker build -t todo-app:lab $APP_DIR
+set +x # keep the API key out of the bootstrap log
+DD_API_KEY='${datadog_api_key}' \
+DD_SITE='${datadog_site}' \
+DD_INSTALL_ONLY=true \
+bash -c "$(curl -fsSL https://install.datadoghq.com/scripts/install_script_agent7.sh)"
+
+cat > /etc/datadog-agent/datadog.yaml <<'EOF'
+api_key: ${datadog_api_key}
+site: ${datadog_site}
+tags:
+  - env:attack-path-lab
+  - project:dd-attack-path-lab
+
+remote_configuration:
+  enabled: true
+
+apm_config:
+  enabled: true
+  # The app container reaches the Agent on the docker bridge (host.docker.internal:8126).
+  # Port 8126 is not open in the security group; only port 80 is.
+  apm_non_local_traffic: true
+
+process_config:
+  process_collection:
+    enabled: true
+
+container_image:
+  enabled: true
+
+sbom:
+  enabled: true
+  container_image:
+    enabled: true
+    analyzers: ["os", "languages"]
+  host:
+    enabled: true
+    analyzers: ["os", "languages"]
+  # Runtime package prioritization (Agent 7.79+, Linux/eBPF via Workload Protection):
+  # flags apt packages that are actually loaded/running, accessed by root, or SUID,
+  # which feeds the reachability factor in vulnerability prioritization.
+  enrichment:
+    usage:
+      enabled: true
+
+compliance_config:
+  enabled: true
+  host_benchmarks:
+    enabled: true
+EOF
+
+cat > /etc/datadog-agent/system-probe.yaml <<'EOF'
+runtime_security_config:
+  enabled: true
+EOF
+
+cat > /etc/datadog-agent/security-agent.yaml <<'EOF'
+runtime_security_config:
+  enabled: true
+compliance_config:
+  enabled: true
+  host_benchmarks:
+    enabled: true
+EOF
+
+chown root:dd-agent /etc/datadog-agent/datadog.yaml /etc/datadog-agent/system-probe.yaml /etc/datadog-agent/security-agent.yaml
+chmod 640 /etc/datadog-agent/datadog.yaml /etc/datadog-agent/system-probe.yaml /etc/datadog-agent/security-agent.yaml
+usermod -aG docker dd-agent
+systemctl enable datadog-agent
+systemctl restart datadog-agent
+set -x
+%{ endif ~}
+
+# ---------------------------------------------------------------------------
+# 5. Build and run the container
+# ---------------------------------------------------------------------------
+docker build \
+  --build-arg DD_GIT_REPOSITORY_URL='${git_repository_url}' \
+  --build-arg DD_GIT_COMMIT_SHA='${git_commit_sha}' \
+  -t todo-app:lab $APP_DIR
 docker rm -f todo-app 2>/dev/null || true
 docker run -d \
   --name todo-app \
   --restart unless-stopped \
   -p 80:5000 \
   -v /opt/todo-data:/data \
+  --add-host=host.docker.internal:host-gateway \
+  -e DD_AGENT_HOST=host.docker.internal \
   -l com.datadoghq.tags.env=attack-path-lab \
   -l com.datadoghq.tags.service=todo-app \
   -l com.datadoghq.tags.version=0.1.0 \
   todo-app:lab
-
-%{ if install_datadog_agent ~}
-# ---------------------------------------------------------------------------
-# 5. Optional: Datadog Agent with SBOM (host + container images) and CSM
-# ---------------------------------------------------------------------------
-set +x # keep the API key out of the bootstrap log
-DD_API_KEY='${datadog_api_key}' \
-DD_SITE='${datadog_site}' \
-DD_HOST_TAGS='env:attack-path-lab,service:todo-app,project:dd-attack-path-lab' \
-DD_RUNTIME_SECURITY_CONFIG_ENABLED=true \
-DD_COMPLIANCE_CONFIG_ENABLED=true \
-DD_SBOM_CONTAINER_IMAGE_ENABLED=true \
-DD_SBOM_HOST_ENABLED=true \
-bash -c "$(curl -fsSL https://install.datadoghq.com/scripts/install_script_agent7.sh)"
-usermod -aG docker dd-agent
-systemctl restart datadog-agent
-%{ endif ~}
 
 echo "lab bootstrap complete"
