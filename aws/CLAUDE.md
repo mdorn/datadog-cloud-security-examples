@@ -66,6 +66,7 @@ remove one.
 
 ```
 .
+├── ../entity.datadog.yaml     Software Catalog definition for todo-app (repo root)
 ├── CLAUDE.md                  this file
 ├── README.md                  human quickstart
 ├── Makefile                   init / plan / apply / destroy / scan / shell shortcuts
@@ -139,6 +140,11 @@ sandbox account:
    Agent 7.79+: flags packages that are running, accessed by root or SUID). Note: Agentless **skips** hosts where the Agent runs with both
    Cloud Security Vulnerabilities and Misconfigurations enabled, so host vulns then come
    from the Agent. S3 SDS always needs Agentless.
+4. **GitHub integration** with access to this repo (Source Code Integration, SAST, and
+   Software Catalog sync). The service page's "Code Repository" link and "Code Location"
+   come from `entity.datadog.yaml` at the **repo root** (Software Catalog v3), not from
+   the tracer's `DD_GIT_*` env vars. Those env vars power in-context code links in
+   traces, IAST/AAP vulns and profiles. Keep `metadata.name` equal to `DD_SERVICE`.
 
 The bucket uses SSE-S3 (AES256), not KMS, so the Agentless scanner needs no extra key
 grants.

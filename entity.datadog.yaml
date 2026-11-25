@@ -1,0 +1,27 @@
+# Datadog Software Catalog entity definitions (schema v3), synced through the GitHub integration.
+# These populate the service page's "Code Repository" link and "Code Location".
+# (In-context code links in traces, IAST/AAP vulns and profiles come from the tracer's
+# DD_GIT_REPOSITORY_URL / DD_GIT_COMMIT_SHA instead; see aws/app/Dockerfile.)
+# Add one document per service, separated by ---, as new scenarios are added.
+apiVersion: v3
+kind: service
+metadata:
+  name: todo-app # must match DD_SERVICE in aws/app/Dockerfile
+  displayName: Lab To-Do app
+  description: Deliberately vulnerable Flask to-do app (Datadog attack path lab, AWS scenario 01).
+  links:
+    - name: Source code
+      type: repo
+      provider: github
+      url: https://github.com/mdorn/datadog-cloud-security-examples/tree/main/aws/app
+spec:
+  lifecycle: experimental
+  tier: low
+  type: web
+  languages:
+    - python
+datadog:
+  codeLocations:
+    - repositoryURL: https://github.com/mdorn/datadog-cloud-security-examples.git
+      paths:
+        - aws/app/**
