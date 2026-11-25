@@ -80,6 +80,12 @@ sbom:
   host:
     enabled: true
     analyzers: ["os", "languages"]
+  # Runtime package prioritization (Agent 7.79+, Linux/eBPF via Workload Protection):
+  # flags apt packages that are actually loaded/running, accessed by root, or SUID,
+  # which feeds the reachability factor in vulnerability prioritization.
+  enrichment:
+    usage:
+      enabled: true
 
 compliance_config:
   enabled: true

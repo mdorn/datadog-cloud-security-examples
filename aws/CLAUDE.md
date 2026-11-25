@@ -109,8 +109,10 @@ data template, and cloud-init writes it to `/opt/todo-app`, then runs
 
 - Changing anything in `app/` changes user data, which **replaces the instance**
   (`user_data_replace_on_change = true`). That is intended.
-- EC2 user data is capped at 16 KB. If the app grows past that, move delivery to an S3
-  prefix or ECR (ECR also adds a registry-scanning demo).
+- EC2 user data is capped at 16 KB. It is sent gzipped (`user_data_base64 =
+  base64gzip(...)`; cloud-init unpacks it), about 7.7 KB today, and a precondition checks
+  the gzipped size. If the app grows past that, move delivery to an S3 prefix or ECR
+  (ECR also adds a registry-scanning demo).
 - Boot logs: `/var/log/cloud-init-output.log` on the instance.
 - Source code integration: `docker build` gets `DD_GIT_REPOSITORY_URL` and
   `DD_GIT_COMMIT_SHA` as build args from `var.git_repository_url` / `var.git_commit_sha`.
@@ -133,7 +135,8 @@ sandbox account:
    the Agent on the instance. User data writes `datadog.yaml`, `system-probe.yaml` and
    `security-agent.yaml` in full: APM (non-local traffic, for the container), Remote
    Configuration, SBOM for host and container images, compliance (misconfigurations) and
-   Workload Protection. Note: Agentless **skips** hosts where the Agent runs with both
+   Workload Protection, plus **runtime package prioritization** (`sbom.enrichment.usage`,
+   Agent 7.79+: flags packages that are running, accessed by root or SUID). Note: Agentless **skips** hosts where the Agent runs with both
    Cloud Security Vulnerabilities and Misconfigurations enabled, so host vulns then come
    from the Agent. S3 SDS always needs Agentless.
 
