@@ -75,3 +75,24 @@ variable "datadog_site" {
   type        = string
   default     = "datadoghq.com"
 }
+
+# ---------------------------------------------------------------------------
+# Datadog source code integration (git metadata baked into the app image)
+# ---------------------------------------------------------------------------
+
+variable "git_repository_url" {
+  description = "Git repository URL for Datadog source code integration (DD_GIT_REPOSITORY_URL)."
+  type        = string
+  default     = "https://github.com/mdorn/datadog-cloud-security-examples"
+}
+
+variable "git_commit_sha" {
+  description = "Full commit SHA the app is deployed from (DD_GIT_COMMIT_SHA). The Makefile sets it from `git rev-parse HEAD`; otherwise export TF_VAR_git_commit_sha. The commit must be pushed."
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = var.git_commit_sha == "" || can(regex("^[0-9a-f]{40}$", var.git_commit_sha))
+    error_message = "git_commit_sha must be a full 40-character lowercase hex SHA (or empty)."
+  }
+}

@@ -32,6 +32,13 @@ ENV TODO_DB=/data/todos.db
 VOLUME ["/data"]
 EXPOSE 5000
 
+# Source code integration: git metadata comes in as build args (the .git dir is not in the
+# build context). ddtrace reads these at runtime and tags traces, vulns and stack frames.
+ARG DD_GIT_REPOSITORY_URL=""
+ARG DD_GIT_COMMIT_SHA=""
+ENV DD_GIT_REPOSITORY_URL=${DD_GIT_REPOSITORY_URL} \
+    DD_GIT_COMMIT_SHA=${DD_GIT_COMMIT_SHA}
+
 # Datadog tracing and application security (ddtrace-run below).
 # DD_AGENT_HOST is set at `docker run` time (host Agent via host.docker.internal).
 ENV DD_SERVICE=todo-app \

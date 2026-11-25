@@ -1,5 +1,9 @@
 TF := terraform -chdir=terraform
 
+# Datadog source code integration: deploy metadata for the commit you are on.
+# Commit and push first, or Datadog cannot resolve the SHA.
+export TF_VAR_git_commit_sha := $(shell git rev-parse HEAD 2>/dev/null)
+
 .PHONY: init fmt validate plan apply destroy output shell scan data app-local
 
 init:

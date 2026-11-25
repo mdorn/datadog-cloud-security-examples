@@ -35,7 +35,16 @@ locals {
     install_datadog_agent = var.install_datadog_agent
     datadog_api_key       = var.datadog_api_key
     datadog_site          = var.datadog_site
+    git_repository_url    = var.git_repository_url
+    git_commit_sha        = var.git_commit_sha
   })
+}
+
+check "git_commit_sha_set" {
+  assert {
+    condition     = var.git_commit_sha != ""
+    error_message = "git_commit_sha is empty, so Datadog source code integration will not link traces or vulns to code. Use `make plan`/`make apply`, or export TF_VAR_git_commit_sha=$(git rev-parse HEAD)."
+  }
 }
 
 resource "aws_instance" "app" {

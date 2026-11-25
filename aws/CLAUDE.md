@@ -98,6 +98,11 @@ data template, and cloud-init writes it to `/opt/todo-app`, then runs
 - EC2 user data is capped at 16 KB. If the app grows past that, move delivery to an S3
   prefix or ECR (ECR also adds a registry-scanning demo).
 - Boot logs: `/var/log/cloud-init-output.log` on the instance.
+- Source code integration: `docker build` gets `DD_GIT_REPOSITORY_URL` and
+  `DD_GIT_COMMIT_SHA` as build args from `var.git_repository_url` / `var.git_commit_sha`.
+  The Makefile exports `TF_VAR_git_commit_sha=$(git rev-parse HEAD)`; when running
+  `terraform` directly, export it yourself. **Commit and push before apply** so Datadog
+  can resolve the SHA. A new SHA changes user data, so the instance is replaced.
 
 ## Datadog setup (outside this repo)
 

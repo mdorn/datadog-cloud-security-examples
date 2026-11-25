@@ -112,7 +112,10 @@ set -x
 # ---------------------------------------------------------------------------
 # 5. Build and run the container
 # ---------------------------------------------------------------------------
-docker build -t todo-app:lab $APP_DIR
+docker build \
+  --build-arg DD_GIT_REPOSITORY_URL='${git_repository_url}' \
+  --build-arg DD_GIT_COMMIT_SHA='${git_commit_sha}' \
+  -t todo-app:lab $APP_DIR
 docker rm -f todo-app 2>/dev/null || true
 docker run -d \
   --name todo-app \
