@@ -1,0 +1,14 @@
+# INTENTIONAL: every pin below is old and has known CVEs. Do not upgrade unless asked.
+# Pins are chosen to install together on python:3.8-buster.
+
+Flask==0.12.2        # CVE-2018-1000656 (DoS via JSON), CVE-2019-1010083 (DoS), CVE-2023-30861 (session cookie leak)
+Werkzeug==0.14.1     # CVE-2019-14806, CVE-2023-25577 (multipart DoS), CVE-2023-46136, CVE-2024-34069 (debugger RCE, high)
+Jinja2==2.10         # CVE-2019-10906 (sandbox escape), CVE-2020-28493, CVE-2024-22195, CVE-2024-34064, CVE-2024-56201
+MarkupSafe==1.1.1
+itsdangerous==0.24
+click==7.0
+
+PyYAML==5.3.1        # CVE-2020-14343 (arbitrary code execution via full_load, CVSS 9.8 critical)
+requests==2.19.1     # CVE-2018-18074 (credential leak on redirect), CVE-2023-32681 (proxy auth leak)
+urllib3==1.23        # CVE-2018-20060, CVE-2019-11236 (CRLF injection), CVE-2019-11324, CVE-2021-33503 (ReDoS)
+gunicorn==19.9.0     # CVE-2024-1135 (HTTP request smuggling, high), CVE-2024-6827

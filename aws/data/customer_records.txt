@@ -1,0 +1,29 @@
+Example Retail Co. customer export (SYNTHETIC TEST DATA, NOT REAL PEOPLE)
+Generated for the Datadog attack path lab. Do not use outside the sandbox.
+
+customer_id | full_name | date_of_birth | social_security_number | city
+CUST-01001 | Parker Mockford | 1993-01-02 | SSN: 689-89-2258 | Greenville, SC
+CUST-01002 | Skyler Synthers | 1960-08-14 | SSN: 796-73-4036 | Springfield, IL
+CUST-01003 | Sawyer Testwell | 1987-09-02 | SSN: 146-82-7423 | Riverton, WY
+CUST-01004 | Dakota Testwell | 1998-12-18 | SSN: 361-76-4107 | Springfield, IL
+CUST-01005 | Jordan Notreal | 1966-11-06 | SSN: 461-71-5290 | Fairview, TX
+CUST-01006 | Sawyer Dummond | 1987-11-09 | SSN: 276-47-9430 | Fairview, TX
+CUST-01007 | Harper Placeman | 1951-05-02 | SSN: 156-04-4655 | Greenville, SC
+CUST-01008 | Sawyer Synthers | 2000-07-16 | SSN: 413-95-9968 | Greenville, SC
+CUST-01009 | Finley Examplar | 1963-06-28 | SSN: 197-24-2025 | Fairview, TX
+CUST-01010 | Parker Synthers | 1991-07-07 | SSN: 759-10-6823 | Fairview, TX
+CUST-01011 | Dakota Labworth | 1977-07-16 | SSN: 112-60-0527 | Franklin, TN
+CUST-01012 | Sawyer Examplar | 1986-02-02 | SSN: 892-63-3521 | Greenville, SC
+CUST-01013 | Quinn Synthers | 1960-11-05 | SSN: 754-60-5305 | Springfield, IL
+CUST-01014 | Morgan Examplar | 1974-06-17 | SSN: 651-42-9554 | Springfield, IL
+CUST-01015 | Avery Samplesby | 1958-09-09 | SSN: 246-88-7132 | Greenville, SC
+CUST-01016 | Harper Samplesby | 1963-01-15 | SSN: 064-01-5524 | Franklin, TN
+CUST-01017 | Morgan Synthers | 1974-04-26 | SSN: 416-29-3566 | Franklin, TN
+CUST-01018 | Sawyer Dummond | 1963-06-12 | SSN: 288-03-5861 | Springfield, IL
+CUST-01019 | Finley Synthers | 1971-10-13 | SSN: 675-85-0305 | Fairview, TX
+CUST-01020 | Finley Fakeley | 1994-04-07 | SSN: 793-71-6648 | Fairview, TX
+CUST-01021 | Avery Labworth | 1963-12-02 | SSN: 646-46-0705 | Franklin, TN
+CUST-01022 | Skyler Placeman | 1988-05-07 | SSN: 809-98-1445 | Riverton, WY
+CUST-01023 | Harper Labworth | 1967-04-24 | SSN: 077-94-9446 | Fairview, TX
+CUST-01024 | Quinn Mockford | 1951-07-23 | SSN: 226-56-0727 | Franklin, TN
+CUST-01025 | Avery Dummond | 1984-03-17 | SSN: 592-35-6438 | Franklin, TN

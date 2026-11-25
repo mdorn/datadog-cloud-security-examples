@@ -1,0 +1,69 @@
+#!/bin/bash
+# Rendered by Terraform (ec2.tf). Bash variables are written as $VAR, never with braces,
+# because braces after a dollar sign are Terraform interpolation.
+set -euxo pipefail
+exec > >(tee -a /var/log/lab-bootstrap.log) 2>&1
+
+# ---------------------------------------------------------------------------
+# 1. INTENTIONAL: freeze the old AMI. No unattended upgrades, so host CVEs stay.
+# ---------------------------------------------------------------------------
+systemctl stop unattended-upgrades.service apt-daily.timer apt-daily-upgrade.timer || true
+systemctl disable unattended-upgrades.service apt-daily.timer apt-daily-upgrade.timer || true
+systemctl mask apt-daily.service apt-daily-upgrade.service || true
+cat > /etc/apt/apt.conf.d/99-lab-no-auto-upgrades <<'EOF'
+APT::Periodic::Update-Package-Lists "0";
+APT::Periodic::Unattended-Upgrade "0";
+EOF
+
+# ---------------------------------------------------------------------------
+# 2. Docker (install only, no dist-upgrade)
+# ---------------------------------------------------------------------------
+export DEBIAN_FRONTEND=noninteractive
+APT_OPTS="-o DPkg::Lock::Timeout=600 -y --no-install-recommends"
+apt-get -o DPkg::Lock::Timeout=600 update
+apt-get $APT_OPTS install docker.io
+systemctl enable --now docker
+
+# ---------------------------------------------------------------------------
+# 3. Write the app files shipped in user data
+# ---------------------------------------------------------------------------
+APP_DIR=/opt/todo-app
+mkdir -p $APP_DIR /opt/todo-data
+%{ for path, content in app_files ~}
+mkdir -p "$(dirname "$APP_DIR/${path}")"
+echo '${content}' | base64 -d > "$APP_DIR/${path}"
+%{ endfor ~}
+
+# ---------------------------------------------------------------------------
+# 4. Build and run the container
+# ---------------------------------------------------------------------------
+docker build -t todo-app:lab $APP_DIR
+docker rm -f todo-app 2>/dev/null || true
+docker run -d \
+  --name todo-app \
+  --restart unless-stopped \
+  -p 80:5000 \
+  -v /opt/todo-data:/data \
+  -l com.datadoghq.tags.env=attack-path-lab \
+  -l com.datadoghq.tags.service=todo-app \
+  -l com.datadoghq.tags.version=0.1.0 \
+  todo-app:lab
+
+%{ if install_datadog_agent ~}
+# ---------------------------------------------------------------------------
+# 5. Optional: Datadog Agent with SBOM (host + container images) and CSM
+# ---------------------------------------------------------------------------
+set +x # keep the API key out of the bootstrap log
+DD_API_KEY='${datadog_api_key}' \
+DD_SITE='${datadog_site}' \
+DD_HOST_TAGS='env:attack-path-lab,service:todo-app,project:dd-attack-path-lab' \
+DD_RUNTIME_SECURITY_CONFIG_ENABLED=true \
+DD_COMPLIANCE_CONFIG_ENABLED=true \
+DD_SBOM_CONTAINER_IMAGE_ENABLED=true \
+DD_SBOM_HOST_ENABLED=true \
+bash -c "$(curl -fsSL https://install.datadoghq.com/scripts/install_script_agent7.sh)"
+usermod -aG docker dd-agent
+systemctl restart datadog-agent
+%{ endif ~}
+
+echo "lab bootstrap complete"

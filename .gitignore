@@ -1,0 +1,33 @@
+# Terraform (state is local and must never be committed: repo is public)
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfplan
+tfplan
+*.tfvars
+*.tfvars.json
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+generated.tf
+
+# Local env / secrets
+.env
+.env.*
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+
+# Java build output
+app/target/
+
+# Local-only planning notes
+PROMPT.md
+
+# Terraform plan logs written by scripts
+**/.plan.log
