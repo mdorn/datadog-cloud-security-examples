@@ -92,6 +92,15 @@ remove one.
     └── terraform.tfvars.example
 ```
 
+## Terraform state
+
+State lives in S3: `s3://tfstate-mdorn/datadog-cloud-security-examples/terraform.tfstate`
+(us-east-2, versioned, S3-native locking via `use_lockfile`), configured in
+`terraform/versions.tf`. Datadog ingests it (Terraform state ingestion is set up on the
+Datadog side and needs read access to that bucket). The backend authenticates with
+`AWS_PROFILE` or the default credential chain, not `var.aws_profile`.
+State holds the Datadog API key (inside user data), so treat the bucket as sensitive.
+
 ## How the app gets onto the instance
 
 No registry. `ec2.tf` reads every file under `app/`, base64-encodes it into the user

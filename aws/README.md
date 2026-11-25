@@ -9,7 +9,7 @@ full of synthetic SSNs.
 
 ## Prerequisites
 
-- Terraform >= 1.5, AWS CLI v2 + Session Manager plugin, credentials for a sandbox account
+- Terraform >= 1.10, AWS CLI v2 + Session Manager plugin, credentials for a sandbox account
 - Datadog: AWS integration with Cloud Security on, plus Agentless Scanning with
   Sensitive Data Scanner for cloud storage in the lab's region (see `CLAUDE.md`)
 
@@ -17,7 +17,7 @@ full of synthetic SSNs.
 
 ```bash
 cp terraform/terraform.tfvars.example terraform/terraform.tfvars   # edit owner, region, profile
-make init
+make init             # state is in S3 (terraform/versions.tf); first time from local state: terraform -chdir=terraform init -migrate-state
 make plan
 make apply            # ~5 min until the app answers on app_url
 make output           # app_url, instance ARN, bucket name
